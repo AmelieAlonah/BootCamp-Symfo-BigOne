@@ -40,3 +40,13 @@
 | /back/job/update/{id<\d+>} | back_job_update | Back\Job   | GET POST       | update()   |
 | /back/job/delete/{id<\d+>} | back_job_delete | Back\Job   | DELETE         | delete()   |
 
+# FRONT-OFFICE
+
+## MainController
+
+| Routes                                    | Route's name        | Controller | Methods (HTTP) | Méthods     |
+| ----------------------------------------- | ------------------- | ---------- | -------------- | ----------- |
+| /                                         | home                | Front\Main | GET            | home()      |
+| /movie/{slug/^[a-z0-9]+(?:-[a-z0-9]+)*$/} | movie_read          | Front\Main | GET            | readMovie() |
+| /movie/{id<\d+>}/create/review            | movie_create_review | Front\Main | GET POST       | create()    |
+
