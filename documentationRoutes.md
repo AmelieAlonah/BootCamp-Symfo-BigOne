@@ -50,3 +50,8 @@
 | /movie/{slug/^[a-z0-9]+(?:-[a-z0-9]+)*$/} | movie_read          | Front\Main | GET            | readMovie() |
 | /movie/{id<\d+>}/create/review            | movie_create_review | Front\Main | GET POST       | create()    |
 
+## SecurityController
+
+| Routes | Route's name | Controller     | Methods (HTTP) | Méthods |
+| ------ | ------------ | -------------- | -------------- | ------- |
+| /login | login        | Front\Security | GET            | login() |
