@@ -54,4 +54,5 @@
 
 | Routes | Route's name | Controller     | Methods (HTTP) | Méthods |
 | ------ | ------------ | -------------- | -------------- | ------- |
-| /login | login        | Front\Security | GET            | login() |
+| /login | app_login    | Front\Security | GET            | login() |
+| /logout| app_logout   | Front\Security | GET            | logout()|

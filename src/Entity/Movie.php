@@ -2,20 +2,35 @@
 
 namespace App\Entity;
 
-use DateTime;
-use Doctrine\ORM\Mapping as ORM;
-
 use App\Repository\MovieRepository;
+// On va appliquer la logique de mapping via l'annotation @ORM
+// qui correspond à un dossier "Mapping" de Doctrine
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=MovieRepository::class)
+ * 
+ * @ORM\HasLifecycleCallbacks()
+ * 
+ * @UniqueEntity("title")
  */
 class Movie
 {
     /**
+     * Ceci est un DocBlock
+     * 
+     * Clé primaire
+     * Auto-increment
+     * type INT
+     * 
+     * Ceci est une série d'annotations dans un DocBlock
+     * 
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
@@ -24,11 +39,12 @@ class Movie
     private $id;
 
     /**
+     * Titre
+     * 
      * @ORM\Column(type="string", length=211, unique=true)
      * 
      * @Assert\NotBlank
      * @Assert\Length(max=211)
-     * 
      * @Groups("movies_get")
      */
     private $title;
@@ -46,9 +62,7 @@ class Movie
     /**
      * @ORM\ManyToMany(targetEntity=Genre::class, inversedBy="movies")
      * @ORM\OrderBy({"name"="ASC"})
-     * 
      * @Assert\Count(min=1)
-     * 
      * @Groups("movies_get")
      */
     private $genres;
@@ -56,10 +70,9 @@ class Movie
     /**
      * @ORM\OneToMany(targetEntity=Casting::class, mappedBy="movie", cascade={"remove"})
      * @ORM\OrderBy({"creditOrder"="ASC"})
-     * 
      * @Groups("movies_get")
      */
-    private $casting;
+    private $castings;
 
     /**
      * @ORM\OneToMany(targetEntity=Review::class, mappedBy="movie", orphanRemoval=true)
@@ -68,9 +81,7 @@ class Movie
 
     /**
      * @ORM\Column(type="datetime")
-     * 
      * @Assert\NotBlank
-     * 
      * @Groups("movies_get")
      */
     private $releaseDate;
@@ -81,7 +92,6 @@ class Movie
      * @Assert\NotBlank
      * @Assert\Positive
      * @Assert\LessThanOrEqual(1440)
-     * 
      * @Groups("movies_get")
      */
     private $duration;
@@ -94,25 +104,23 @@ class Movie
 
     /**
      * @ORM\Column(type="smallint", nullable=true)
-     * 
+     * @Groups("movies_get")
      * @Assert\NotBlank
      * @Assert\Type("int") 
      * @Assert\Length(max = 1)
      * @Assert\Choice({5, 4, 3, 2, 1}) 
-     * 
      * @Groups({"movies_get"})
      */
     private $rating;
 
     /**
      * @ORM\Column(type="string", length=211, unique=true)
-     * 
      * @Groups("movies_get")
      */
     private $slug;
 
     /**
-     * Defaults values
+     * Default values
      */
     public function __construct()
     {
@@ -123,89 +131,164 @@ class Movie
         $this->reviews      = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    /**
+     * Get clé primaire
+     */ 
+    public function getId()
     {
         return $this->id;
     }
 
-    public function getTitle(): ?string
+    /**
+     * Get titre
+     */ 
+    public function getTitle()
     {
         return $this->title;
     }
 
-    public function setTitle(string $title): self
+    /**
+     * Set titre
+     *
+     * @return  self
+     */ 
+    public function setTitle(string $title)
     {
         $this->title = $title;
 
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    /**
+     * Get the value of createdAt
+     */ 
+    public function getCreatedAt()
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    /**
+     * Set the value of createdAt
+     *
+     * @return  self
+     */ 
+    public function setCreatedAt(DateTime $createdAt)
     {
         $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
+    /**
+     * Get the value of updatedAt
+     */ 
+    public function getUpdatedAt()
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): self
+    /**
+     * Set the value of updatedAt
+     *
+     * @return  self
+     */ 
+    public function setUpdatedAt(DateTime $updatedAt)
     {
         $this->updatedAt = $updatedAt;
 
         return $this;
     }
 
-    public function getGenres(): ?string
+    /**
+     * @return Collection|Genre[]
+     */
+    public function getGenres(): Collection
     {
         return $this->genres;
     }
 
-    public function setGenres(string $genres): self
+    public function addGenre(Genre $genre): self
     {
-        $this->genres = $genres;
+        if (!$this->genres->contains($genre)) {
+            $this->genres[] = $genre;
+        }
 
         return $this;
     }
 
-    public function getCasting(): ?string
+    public function removeGenre(Genre $genre): self
     {
-        return $this->casting;
-    }
-
-    public function setCasting(string $casting): self
-    {
-        $this->casting = $casting;
+        $this->genres->removeElement($genre);
 
         return $this;
     }
 
-    public function getReviews(): ?string
+    /**
+     * @return Collection|Casting[]
+     */
+    public function getCastings(): Collection
+    {
+        return $this->castings;
+    }
+
+    public function addCasting(Casting $casting): self
+    {
+        if (!$this->castings->contains($casting)) {
+            $this->castings[] = $casting;
+            $casting->setMovie($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCasting(Casting $casting): self
+    {
+        if ($this->castings->removeElement($casting)) {
+            // set the owning side to null (unless already changed)
+            if ($casting->getMovie() === $this) {
+                $casting->setMovie(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Review[]
+     */
+    public function getReviews(): Collection
     {
         return $this->reviews;
     }
 
-    public function setReviews(string $reviews): self
+    public function addReview(Review $review): self
     {
-        $this->reviews = $reviews;
+        if (!$this->reviews->contains($review)) {
+            $this->reviews[] = $review;
+            $review->setMovie($this);
+        }
 
         return $this;
     }
 
-    public function getReleaseDate(): ?\DateTimeInterface
+    public function removeReview(Review $review): self
+    {
+        if ($this->reviews->removeElement($review)) {
+            // set the owning side to null (unless already changed)
+            if ($review->getMovie() === $this) {
+                $review->setMovie(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getReleaseDate(): ?\DateTime
     {
         return $this->releaseDate;
     }
 
-    public function setReleaseDate(\DateTimeInterface $releaseDate): self
+    public function setReleaseDate(\DateTime $releaseDate): self
     {
         $this->releaseDate = $releaseDate;
 
@@ -229,7 +312,7 @@ class Movie
         return $this->poster;
     }
 
-    public function setPoster(string $poster): self
+    public function setPoster(?string $poster): self
     {
         $this->poster = $poster;
 
@@ -241,7 +324,7 @@ class Movie
         return $this->rating;
     }
 
-    public function setRating(int $rating): self
+    public function setRating(?int $rating): self
     {
         $this->rating = $rating;
 
@@ -259,4 +342,13 @@ class Movie
 
         return $this;
     }
+
+    /**
+     * @ORM\PreUpdate
+     */
+    public function setUpdatedAtValueToNow()
+    {
+        $this->updatedAt = new DateTime();
+    }
+
 }

@@ -2,39 +2,36 @@
 
 namespace App\Entity;
 
-use App\Repository\GenreRepository;
+use App\Repository\DepartmentRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * @ORM\Entity(repositoryClass=GenreRepository::class)
+ * @ORM\Entity(repositoryClass=DepartmentRepository::class)
  */
-class Genre
+class Department
 {
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups("movies_get")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=100)
-     * @Groups("movies_get")
      */
     private $name;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Movie::class, mappedBy="genres")
+     * @ORM\OneToMany(targetEntity=Job::class, mappedBy="department")
      */
-    private $movies;
+    private $jobs;
 
     public function __construct()
     {
-        $this->movies = new ArrayCollection();
+        $this->jobs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -55,27 +52,30 @@ class Genre
     }
 
     /**
-     * @return Collection|Movie[]
+     * @return Collection|Job[]
      */
-    public function getMovies(): Collection
+    public function getJobs(): Collection
     {
-        return $this->movies;
+        return $this->jobs;
     }
 
-    public function addMovie(Movie $movie): self
+    public function addJob(Job $job): self
     {
-        if (!$this->movies->contains($movie)) {
-            $this->movies[] = $movie;
-            $movie->addGenre($this);
+        if (!$this->jobs->contains($job)) {
+            $this->jobs[] = $job;
+            $job->setDepartment($this);
         }
 
         return $this;
     }
 
-    public function removeMovie(Movie $movie): self
+    public function removeJob(Job $job): self
     {
-        if ($this->movies->removeElement($movie)) {
-            $movie->removeGenre($this);
+        if ($this->jobs->removeElement($job)) {
+            // set the owning side to null (unless already changed)
+            if ($job->getDepartment() === $this) {
+                $job->setDepartment(null);
+            }
         }
 
         return $this;
