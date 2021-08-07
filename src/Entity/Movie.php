@@ -2,11 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\MovieRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
-use Symfony\Component\Validator\Constraints as Assert;
+use App\Repository\MovieRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=MovieRepository::class)
@@ -108,6 +110,18 @@ class Movie
      * @Groups("movies_get")
      */
     private $slug;
+
+    /**
+     * Defaults values
+     */
+    public function __construct()
+    {
+        $this->createdAt    = new DateTime();
+        $this->releaseDate  = new DateTime();
+        $this->genres       = new ArrayCollection();
+        $this->castings     = new ArrayCollection();
+        $this->reviews      = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
