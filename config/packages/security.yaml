@@ -1,16 +1,46 @@
 security:
     # https://symfony.com/doc/current/security/experimental_authenticators.html
     enable_authenticator_manager: true
-    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    password_hashers:
+        # For user Class
+        App\Entity\User:
+            algorithm: auto
+
     providers:
-        users_in_memory: { memory: null }
+        # used to reload user from session & other features (e.g. switch_user)
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+
     firewalls:
+        login:
+            pattern: ^/api/login
+            stateless: true
+            json_login:
+                # URL de login
+                check_path: /api/login_check
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        api:
+            pattern:   ^/api
+            stateless: true
+            jwt: ~
+
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
         main:
             lazy: true
-            provider: users_in_memory
+            provider: app_user_provider
+            custom_authenticators:
+                - App\Security\LoginFormAuthenticator
+            logout:
+                path: app_logout
+                # where to redirect after logout
+                # target: app_any_route
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
@@ -21,5 +51,26 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        
+        ### Routes API
+
+        - { path: ^/api/movies, roles: ROLE_ADMIN, methods: POST }
+
+        ### Routes WEB
+
+        # Front : if ROLE_USER : create review on movie.
+        - { path: ^/movie/\d+/create/review, roles: ROLE_USER }
+        # équi to - { path: ^/movie/[0-9]+/create/review, roles: ROLE_USER }
+
+        # Admin : ALL routes /create /update /delete with ROLE_ADMIN.
+        - { path: ^/back/[a-z]+/(create|update|delete), roles: ROLE_ADMIN }
+
+        # Admin : if ROLE_MANAGER : access pages movies list, genres.
+        - { path: ^/back/[a-z]+/(read), roles: ROLE_MANAGER }
+
+    # https://symfony.com/doc/current/security.html#hierarchical-roles
+    role_hierarchy:
+        # ROLE_ADMIN hérite de ROLE_MANAGER
+        ROLE_ADMIN: ROLE_MANAGER
+        # MANAGER et ADMIN like USER on front
+        ROLE_MANAGER: ROLE_USER
