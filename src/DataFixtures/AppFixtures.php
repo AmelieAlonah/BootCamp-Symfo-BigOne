@@ -22,10 +22,10 @@ class AppFixtures extends Fixture
     // MySlugger
     private $mySlugger;
 
-    // La connexion directe (DBAL)
+    // The direct connexion
     private $connection;
 
-    // Injection des services nécessaires
+    // Service injection if util
     public function __construct(MySlugger $mySlugger, Connection $connection)
     {
         $this->mySlugger = $mySlugger;
@@ -34,8 +34,8 @@ class AppFixtures extends Fixture
 
     private function truncate()
     {
-        // Need truncate custom
         $this->connection->executeQuery('SET foreign_key_checks = 0');
+        // Truncate
         $this->connection->executeQuery('TRUNCATE TABLE casting');
         $this->connection->executeQuery('TRUNCATE TABLE department');
         $this->connection->executeQuery('TRUNCATE TABLE genre');
@@ -50,10 +50,9 @@ class AppFixtures extends Fixture
 
     public function load(ObjectManager $manager)
     {
-        // truncate table id -> 1
+        // id=1
         $this->truncate();
 
-        // faker
         $faker = Faker\Factory::create('fr_FR');
 
         $faker->seed('BABAR');
@@ -93,21 +92,17 @@ class AppFixtures extends Fixture
 
         // 20 genres
 
-        // Liste genres
         $genresList = [];
 
         for ($i = 1; $i <= 20; $i++) {
 
-            // New genre
             $genre = new Genre();
             $genre->setName($faker->unique()->movieGenre());
 
-            $genresList[] = $genre; // array_push($genresList, $genre);
+            $genresList[] = $genre;
 
-            // Doctrine Persist
             $manager->persist($genre);
         }
-
 
         // 20 films
 
@@ -122,10 +117,7 @@ class AppFixtures extends Fixture
             $movie->setRating($faker->numberBetween(1, 5));
             $movie->setReleaseDate($faker->dateTimeBetween('-70 years'));
 
-            // slugify with service
-            // => transféré dans le MovieListener
-
-            // random genre associate
+            // Association 1 to 3 random genres
             for ($r = 1; $r <= mt_rand(1, 3); $r++) {
                 $movie->addGenre($genresList[array_rand($genresList)]);
             }
@@ -135,7 +127,7 @@ class AppFixtures extends Fixture
             $manager->persist($movie);
         }
 
-        // 20 personnes
+        // 20 persons
 
         $personsList = [];
 
@@ -150,7 +142,7 @@ class AppFixtures extends Fixture
             $manager->persist($person);
         }
 
-        // castings
+        // Castings
         for ($i = 1; $i < 100; $i++) {
             $casting = new Casting();
             $casting->setRole($faker->firstName());
