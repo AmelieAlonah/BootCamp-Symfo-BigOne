@@ -2,8 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\MovieRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+
+use App\Repository\MovieRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=MovieRepository::class)
@@ -14,63 +19,109 @@ class Movie
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups("movies_get")
      */
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=211, unique=true)
+     * 
+     * @Assert\NotBlank
+     * @Assert\Length(max=211)
+     * 
+     * @Groups("movies_get")
      */
     private $title;
 
     /**
-     * @ORM\Column(type="datetime_immutable")
+     * @ORM\Column(type="datetime")
      */
     private $createdAt;
 
     /**
-     * @ORM\Column(type="datetime_immutable")
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $updatedAt;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\ManyToMany(targetEntity=Genre::class, inversedBy="movies")
+     * @ORM\OrderBy({"name"="ASC"})
+     * 
+     * @Assert\Count(min=1)
+     * 
+     * @Groups("movies_get")
      */
     private $genres;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\OneToMany(targetEntity=Casting::class, mappedBy="movie", cascade={"remove"})
+     * @ORM\OrderBy({"creditOrder"="ASC"})
+     * 
+     * @Groups("movies_get")
      */
     private $casting;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\OneToMany(targetEntity=Review::class, mappedBy="movie", orphanRemoval=true)
      */
     private $reviews;
 
     /**
      * @ORM\Column(type="datetime")
+     * 
+     * @Assert\NotBlank
+     * 
+     * @Groups("movies_get")
      */
     private $releaseDate;
 
     /**
      * @ORM\Column(type="smallint")
+     * 
+     * @Assert\NotBlank
+     * @Assert\Positive
+     * @Assert\LessThanOrEqual(1440)
+     * 
+     * @Groups("movies_get")
      */
     private $duration;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups("movies_get")
      */
     private $poster;
 
     /**
-     * @ORM\Column(type="smallint")
+     * @ORM\Column(type="smallint", nullable=true)
+     * 
+     * @Assert\NotBlank
+     * @Assert\Type("int") 
+     * @Assert\Length(max = 1)
+     * @Assert\Choice({5, 4, 3, 2, 1}) 
+     * 
+     * @Groups({"movies_get"})
      */
     private $rating;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=211, unique=true)
+     * 
+     * @Groups("movies_get")
      */
     private $slug;
+
+    /**
+     * Defaults values
+     */
+    public function __construct()
+    {
+        $this->createdAt    = new DateTime();
+        $this->releaseDate  = new DateTime();
+        $this->genres       = new ArrayCollection();
+        $this->castings     = new ArrayCollection();
+        $this->reviews      = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
