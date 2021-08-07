@@ -3,17 +3,94 @@
     <head>
         <meta charset="UTF-8">
         <title>{% block title %}Welcome!{% endblock %}</title>
-        {# Run `composer require symfony/webpack-encore-bundle`
-           and uncomment the following Encore helpers to start using Symfony UX #}
         {% block stylesheets %}
-            {#{{ encore_entry_link_tags('app') }}#}
+        <!-- Font Awesome icons -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet" />
+        {# Bootstrap 4.6 CSS #}
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+        {# Font #}
+        <link href="https://fonts.googleapis.com/css?family=Montserrat:500,600" rel="stylesheet">
+        {# CSS #}
+        <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
+        {# FavIcon #}
+        <link rel="icon" type="image/x-icon" href="{{ asset('assets/images/favicon.png') }}" />
         {% endblock %}
-
         {% block javascripts %}
             {#{{ encore_entry_script_tags('app') }}#}
         {% endblock %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <a class="navbar-brand" href="{{ path('home') }}">o'Ciné</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{{ path('home') }}">Accueil <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Admin</a>
+                    </li>
+
+                {# If Connected #}
+            
+                {# User mail #}
+                <li class="nav-item mr-auto px-1">
+                    <span class="navbar-text">
+                        Votre mail
+                    </span>
+                </li>
+                
+                {# User role #}
+                <li class="nav-item mr-auto px-1 badge bg-primary">
+                    <span class="navbar-text">
+                        Role de la personne connectée
+                    </span>
+                </li>
+                <li class="nav-item">
+                    <i class="btn btn-warning" href="#">Déconnexion</i>
+                </li>
+                
+                {# If not connected #}
+                
+                <li class="nav-item mr-auto px-1">
+                    <span class="navbar-text">
+                        Visiteur
+                    </span>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-success" href="#">Connexion</a>
+                </li>
+
+            </ul>
+                <form class="form-inline my-2 my-lg-0" action="{{ path('home') }}">
+                    <input class="form-control mr-sm-2" type="search" name="search" placeholder="Un titre de film" value="#" aria-label="Search">
+                    <button class="btn btn-outline-success my-2 my-sm-0 mr-2" type="submit">Rechercher</button>
+                    <a href="{{ path('home') }}" class="btn btn-outline-danger my-2 my-sm-0">x</a>
+                </form>
+            </div>
+        </nav>
+
+        {# Possible sous-nav #}
+        {% block subnav %}{% endblock %}
+
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                <div id="breadcrumb">{% block breadcrumb %}{% endblock %}</div>
+                {% block body %}{% endblock %}
+                </div>
+            </div>
+
+            {# Widget random film #}
+            <hr>
+            <p>Un film au hasard : <a href="#">Titre du film au hasard</a></p>
+            <hr>
+            <div class="small text-secondary pb-3">Allociné clone made with &hearts; !</div>
+
+        </div>
     </body>
 </html>
